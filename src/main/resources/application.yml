@@ -1,0 +1,19 @@
+telegram:
+  bot:
+    chatId: ${tg_chatId}
+    name: ${tg_name}
+    token: ${tg_token}
+spring:
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  datasource:
+    url: "jdbc:sqlite:files.db"
+    driver-class-name: "org.sqlite.JDBC"
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+#url: http://localhost:8080
