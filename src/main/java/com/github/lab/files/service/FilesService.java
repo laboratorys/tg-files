@@ -56,7 +56,7 @@ public class FilesService
 		}
 		else
 		{
-			if (files.length > 0)
+			if (files != null && files.length > 0)
 			{
 				Arrays.stream(files).forEach(f -> {
 					FileInfo info = new FileInfo();
