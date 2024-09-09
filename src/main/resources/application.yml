@@ -9,11 +9,14 @@ spring:
       max-file-size: 100MB
       max-request-size: 100MB
   datasource:
-    url: "jdbc:sqlite:files.db"
-    driver-class-name: "org.sqlite.JDBC"
+    #url: "jdbc:sqlite:files.db"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${db_url}
+    username: ${db_user}
+    password: ${db_password}
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
-    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    database-platform: org.hibernate.dialect.MySQLDialect
 #url: http://localhost:8080
