@@ -35,34 +35,44 @@ public class FilesService
 		List<String> idList = new ArrayList<>();
 		if (StrUtil.isNotBlank(url))
 		{
-			byte[] content = HttpUtil.downloadBytes(url);
-			ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
-			FileInfo info = new FileInfo();
-			String name = FileUtil.getName(url);
-			if (StrUtil.isBlank(name))
+			try
 			{
-				name = String.valueOf(System.currentTimeMillis());
+				byte[] content = HttpUtil.downloadBytes(url);
+				ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
+				FileInfo info = new FileInfo();
+				String name = FileUtil.getName(url);
+				if (StrUtil.isBlank(name))
+				{
+					name = String.valueOf(System.currentTimeMillis());
+				}
+				info.setName(name);
+				FileInfo record = bot.uploadFile(inputStream, info);
+				idList.add(record.getShortId());
 			}
-			info.setName(name);
-			FileInfo record = bot.uploadFile(inputStream, info);
-			idList.add(record.getShortId());
+			catch (Exception e)
+			{
+				log.warn("上传失败：{}", e.getMessage());
+			}
 		}
 		else
 		{
-			Arrays.stream(files).forEach(f -> {
-				FileInfo info = new FileInfo();
-				info.setName(f.getOriginalFilename());
-				try
-				{
-					FileInfo record = bot.uploadFile(f.getInputStream(), info);
-					idList.add(record.getShortId());
-				}
-				catch (IOException e)
-				{
-					log.error(e.getMessage(), e);
-					throw new BizException("文件上传失败");
-				}
-			});
+			if (files.length > 0)
+			{
+				Arrays.stream(files).forEach(f -> {
+					FileInfo info = new FileInfo();
+					info.setName(f.getOriginalFilename());
+					try
+					{
+						FileInfo record = bot.uploadFile(f.getInputStream(), info);
+						idList.add(record.getShortId());
+					}
+					catch (IOException e)
+					{
+						log.error(e.getMessage(), e);
+						throw new BizException("文件上传失败");
+					}
+				});
+			}
 		}
 		return idList;
 	}

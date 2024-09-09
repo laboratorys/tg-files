@@ -19,6 +19,7 @@ public class FileInfo
 	@Id
 	private String id;
 	private String shortId;
+	private String hash;
 	private String name;
 	private Long size;
 	private String sizeFmt;
