@@ -1,6 +1,7 @@
 package com.github.lab.files.config;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
@@ -30,6 +31,7 @@ import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -215,13 +217,16 @@ public class MyFileBot implements SpringLongPollingBot, LongPollingSingleThreadU
 	{
 		try
 		{
-			String hash = SecureUtil.sha256(inputStream);
+			byte[] content = IoUtil.readBytes(inputStream);
+			InputStream is1 = new ByteArrayInputStream(content);
+			InputStream is2 = new ByteArrayInputStream(content);
+			String hash = SecureUtil.sha1(is1);
 			FileInfo record = this.getFileInfoByHash(hash, info.getName());
 			if (record != null)
 			{
 				return record;
 			}
-			SendDocument document = SendDocument.builder().chatId(chatId).document(new InputFile(inputStream, info.getName())).build();
+			SendDocument document = SendDocument.builder().chatId(chatId).document(new InputFile(is2, info.getName())).build();
 			Message message = telegramClient.execute(document);
 			return handleMessage(message, hash);
 		}
