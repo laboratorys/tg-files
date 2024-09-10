@@ -1,0 +1,11 @@
+ _______   ,--,  _,---.,-.,-.    ,---.     .---. 
+|__   __|.' .'    | .-'|(|| |    | .-'    ( .-._)
+  )| |   |  |  __ | `-.(_)| |    | `-.   (_) \   
+ (_) |   \  \ ( _)| .-'| || |    | .-'   _  \ \  
+   | |    \  `-) )| |  | || `--. |  `--.( `-'  ) 
+   `-'    )\____/ )\|  `-'|( __.'/( __.' `----'  
+         (__)    (__)     (_)   (__)
+${AnsiColor.BRIGHT_GREEN}
+Project Version: ${project.version}
+Spring Boot Version: ${spring-boot.version}${spring-boot.formatted-version}
+${AnsiColor.BLACK}

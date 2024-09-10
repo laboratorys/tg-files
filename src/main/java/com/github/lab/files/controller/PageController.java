@@ -1,10 +1,12 @@
 package com.github.lab.files.controller;
 
+import cn.hutool.core.io.IoUtil;
 import com.github.lab.files.common.BizException;
 import com.github.lab.files.model.FileInfo;
 import com.github.lab.files.service.FilesService;
 import jakarta.annotation.Resource;
-import org.springframework.core.io.InputStreamResource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
+@Slf4j
 public class PageController
 {
 
@@ -34,7 +37,8 @@ public class PageController
 	}
 
 	@GetMapping("/f/{id}")
-	public ResponseEntity<InputStreamResource> download(@PathVariable String id)
+	@Cacheable(value = "file", key = "#root.methodName+'_'+#id")
+	public ResponseEntity<byte[]> download(@PathVariable String id)
 	{
 		HttpHeaders headers = new HttpHeaders();
 		FileInfo fileInfo = filesService.getFileInfo(id);
@@ -44,6 +48,6 @@ public class PageController
 		}
 		headers.setContentType(MediaType.parseMediaType(fileInfo.getMimeType()));
 		headers.setContentDisposition(ContentDisposition.inline().filename(fileInfo.getName()).build());
-		return ResponseEntity.ok().headers(headers).body(new InputStreamResource(filesService.downloadFile(fileInfo.getTgFileId())));
+		return ResponseEntity.ok().headers(headers).body(IoUtil.readBytes(filesService.downloadFile(fileInfo.getTgFileId())));
 	}
 }
