@@ -1,9 +1,14 @@
 <template>
-  <n-flex
-    justify="center"
-    align="center"
-    vertical
-    style="width: 100vw; height: 70vh">
+  <n-flex align="center" vertical style="width: 100vw; height: 81vh">
+    <n-input-group class="upload_items">
+      <n-button type="primary"> 密钥 </n-button>
+      <n-input
+        type="text"
+        v-model:value="store.UserToken"
+        placeholder="上传密钥"
+        clearable />
+    </n-input-group>
+
     <n-upload
       multiple
       action="/api/public/file/upload"
@@ -62,7 +67,7 @@
           点击或者拖动文件到该区域来上传
         </n-text>
         <n-p depth="3" style="margin: 8px 0 0 0">
-          请不要上传敏感数据，比如你的银行卡号和密码，信用卡号有效期和安全码
+          本站已上传文件：{{ store.Info.totalCount }}
         </n-p>
       </n-upload-dragger>
       <n-card
@@ -71,6 +76,14 @@
         v-show="showUrl || fileListRef.length > 0"
         @click.stop="clickFileList()">
         <n-upload-file-list />
+        <n-pagination
+          align="center"
+          v-model:page="pageNo"
+          :page-count="totalPages"
+          v-show="totalPages > 1"
+          @update:page="handlePageChange"
+          style="margin-top: 6px"
+          simple />
       </n-card>
     </n-upload>
     <n-card v-show="showUrl" class="upload_items" content-style="padding: 10px">
@@ -124,16 +137,20 @@
 </template>
 <script setup>
 import { useStore } from "@/utils/store.js";
-import { message } from "@/utils/message.js";
-import { getToken, deleteFile, getFileList } from "@/utils/api.js";
+import { message, loadingBar } from "@/utils/message.js";
+import { getToken, deleteFile, getFileList, getInfo } from "@/utils/api.js";
 const showUrl = ref(false);
 const fileUrl = ref("");
 const fileName = ref("");
 const content = ref("");
 const uploadHeaders = ref({});
 const fileListRef = ref([]);
+const pageNo = ref(1);
+const totalPages = ref(1);
+const pageSize = ref(5);
+const store = useStore();
+
 onMounted(() => {
-  const store = useStore();
   if (!store.UserToken) {
     getToken().then((response) => {
       store.UserToken = response.data;
@@ -144,18 +161,33 @@ onMounted(() => {
     uploadHeaders.value = { Authorization: store.UserToken };
     setFileList();
   }
+  getInfo().then((response) => {
+    store.Info = response.data;
+  });
 });
 const setFileList = () => {
   const store = useStore();
-  getFileList(1, 5, store.UserToken).then((response) => {
-    let data = response.data.content;
-    data.forEach(function (item, index, arr) {
-      item.url = origin + "/f/" + item.id;
-      data[index] = item;
-    });
-    fileListRef.value = data;
-  });
+  loadingBar.start();
+  getFileList(pageNo.value, pageSize.value, store.UserToken).then(
+    (response) => {
+      let data = response.data.content;
+      data.forEach(function (item, index, arr) {
+        item.url = item.url;
+        data[index] = item;
+      });
+      fileListRef.value = data;
+      totalPages.value = response.data.totalPages;
+      fileUrl.value = data[0].url;
+      content.value = fileUrl.value;
+      copyToClipboard(fileUrl.value, "URL", false);
+      showUrl.value = true;
+      loadingBar.finish();
+    }
+  );
 };
+function handlePageChange(currentPage) {
+  setFileList();
+}
 const handleUploadChange = (data) => {
   fileListRef.value = data.fileList;
 };
@@ -169,7 +201,7 @@ const handlePreview = (file, { event }) => {
 };
 const handleFinish = ({ file, event }) => {
   const retData = JSON.parse((event?.target).response);
-  fileUrl.value = origin + "/f/" + retData.data[0];
+  fileUrl.value = retData.data[0].url;
   file.url = fileUrl.value;
   content.value = fileUrl.value;
   copyToClipboard(fileUrl.value, "URL", false);

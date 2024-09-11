@@ -6,14 +6,15 @@ import cn.hutool.http.HttpUtil;
 import com.github.lab.files.common.BizException;
 import com.github.lab.files.config.MyFileBot;
 import com.github.lab.files.model.db.FileInfo;
+import com.github.lab.files.model.vo.FileInfoVO;
+import com.github.lab.files.model.vo.InfoVO;
 import com.github.lab.files.model.vo.PageVO;
 import com.github.lab.files.model.vo.UploadFileVO;
 import com.github.lab.files.repository.FileInfoRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,9 +35,19 @@ public class FilesService
 	@Resource
 	private FileInfoRepository fileInfoRepository;
 
-	public List<String> uploadFile(MultipartFile[] files, String url, String token)
+	@Value("${upload_token:}")
+	private String uploadToken;
+
+	@Value("${url:}")
+	private String baseUrl;
+
+	@Value("${project.version}")
+	private String version;
+
+	public List<FileInfoVO> uploadFile(MultipartFile[] files, String url, String token)
 	{
-		List<String> idList = new ArrayList<>();
+		this.validPublicToken(token);
+		List<FileInfoVO> fileList = new ArrayList<>();
 		if (StrUtil.isNotBlank(url))
 		{
 			try
@@ -52,7 +63,7 @@ public class FilesService
 				info.setName(name);
 				info.setToken(token);
 				FileInfo record = bot.uploadFile(inputStream, info);
-				idList.add(record.getShortId());
+				fileList.add(new FileInfoVO(record.getShortId(), record.getName(), StrUtil.format("{}/f/{}", baseUrl, record.getShortId())));
 			}
 			catch (Exception e)
 			{
@@ -70,7 +81,7 @@ public class FilesService
 					try
 					{
 						FileInfo record = bot.uploadFile(f.getInputStream(), info);
-						idList.add(record.getShortId());
+						fileList.add(new FileInfoVO(record.getShortId(), record.getName(), StrUtil.format("{}/f/{}", baseUrl, record.getShortId())));
 					}
 					catch (IOException e)
 					{
@@ -80,7 +91,15 @@ public class FilesService
 				});
 			}
 		}
-		return idList;
+		return fileList;
+	}
+
+	private void validPublicToken(String token)
+	{
+		if (StrUtil.isNotBlank(uploadToken) && !uploadToken.equals(token))
+		{
+			throw new BizException("上传接口暂未公开，请见谅！");
+		}
 	}
 
 	public InputStream downloadFile(String fileId)
@@ -125,17 +144,27 @@ public class FilesService
 					totalCount(0L).
 					content(new ArrayList<>()).build();
 		}
-		Pageable pageable = Pageable.ofSize(pageSize).withPage(pageNo - 1);
+		Sort sort = Sort.by(Sort.Direction.ASC, "uploadTime");
+		Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
 		FileInfo record = new FileInfo();
 		record.setToken(token);
 		Example<FileInfo> example = Example.of(record);
 		Page<FileInfo> page = fileInfoRepository.findAll(example, pageable);
-		Page<UploadFileVO> data = page.map(f -> new UploadFileVO(f.getShortId(), f.getName(), null, "finished"));
+		Page<UploadFileVO> data = page.map(f -> new UploadFileVO(f.getShortId(), f.getName(), StrUtil.format("{}/f/{}", baseUrl, f.getShortId()), "finished"));
 		return PageVO.<UploadFileVO> builder().
 				pageNo(pageNo).
 				pageSize(pageSize).
 				totalPages(data.getTotalPages()).
 				totalCount(data.getTotalElements()).
 				content(data.getContent()).build();
+	}
+
+	public InfoVO info()
+	{
+		InfoVO info = new InfoVO();
+		long count = fileInfoRepository.count(Example.of(new FileInfo()));
+		info.setTotalCount(count);
+		info.setVersion(version);
+		return info;
 	}
 }

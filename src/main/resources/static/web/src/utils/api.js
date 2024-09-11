@@ -20,3 +20,10 @@ export function deleteFile(id, token) {
     method: "get",
   });
 }
+//图床信息
+export function getInfo() {
+  return request({
+    url: `/api/public/file/info`,
+    method: "get",
+  });
+}

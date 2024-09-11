@@ -36,4 +36,5 @@ logging:
     org.springframework: warn
 project:
   version: v@version@
+upload_token: ${upload_token}
 #url: http://localhost:8080

@@ -3,6 +3,8 @@ package com.github.lab.files.controller;
 import cn.dev33.satoken.util.SaFoxUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.lab.files.common.RespBody;
+import com.github.lab.files.model.vo.FileInfoVO;
+import com.github.lab.files.model.vo.InfoVO;
 import com.github.lab.files.model.vo.PageVO;
 import com.github.lab.files.model.vo.UploadFileVO;
 import com.github.lab.files.service.FilesService;
@@ -19,8 +21,14 @@ public class ApiController
 	@Resource
 	private FilesService filesService;
 
+	@GetMapping("/public/file/info")
+	public RespBody<InfoVO> info()
+	{
+		return RespBody.ok(filesService.info());
+	}
+
 	@RequestMapping("/public/file/upload")
-	public RespBody<List<String>> upload(
+	public RespBody<List<FileInfoVO>> upload(
 			@RequestParam(name = "files", required = false) MultipartFile[] files,
 			@RequestParam(name = "url", required = false) String url,
 			@RequestHeader("Authorization") String tokenHeader,

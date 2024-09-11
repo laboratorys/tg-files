@@ -5,6 +5,7 @@ export const useStore = defineStore("main", {
     ThemeMode: "dark",
     UserToken: "",
     FilesList: [],
+    Info: {},
   }),
   persist: true,
 });

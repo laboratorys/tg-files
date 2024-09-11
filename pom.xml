@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.github.lab</groupId>
     <artifactId>tg-files</artifactId>
-    <version>1.0.0</version>
+    <version>1.0-Beta</version>
     <name>tg-files</name>
     <properties>
         <java.version>17</java.version>
