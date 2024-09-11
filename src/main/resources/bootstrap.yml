@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: tg-files
+  profiles:
+    active: sqlite
+  config:
+    import: classpath:common.yml

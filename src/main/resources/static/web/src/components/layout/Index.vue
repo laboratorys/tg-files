@@ -14,8 +14,9 @@
             <DarkTheme24Regular />
           </n-icon>
         </n-button>
-        <n-divider vertical></n-divider>
+        <n-divider vertical v-show="false"></n-divider>
         <n-button
+          v-show="false"
           text
           style="font-size: 24px"
           @click="OpenUrl('https://github.com/laboratorys/tg-files')">

@@ -1,20 +1,9 @@
-telegram:
-  bot:
-    chatId: ${tg_chatId}
-    name: ${tg_name}
-    token: ${tg_token}
 spring:
   servlet:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
   datasource:
-    url: "jdbc:sqlite:/data/files.db"
-    driver-class-name: "org.sqlite.JDBC"
-    #driver-class-name: com.mysql.cj.jdbc.Driver
-    #url: ${db_url}
-    #username: ${db_user}
-    #password: ${db_password}
     hikari:
       maximum-pool-size: 100 #最大连接数,默认值10.
       minimum-idle: 20 #最小空闲连接，默认值10.
@@ -24,16 +13,9 @@ spring:
       idle-timeout: 600000
       max-lifetime: 3000000 #连接最大存活时间,默认值30分钟.设置应该比mysql设置的超时时间短
       connection-test-query: select 1 #连接测试查询
-  jpa:
-    show-sql: false
-    hibernate:
-      ddl-auto: update
-    #database-platform: org.hibernate.dialect.MySQLDialect
-    database-platform: org.hibernate.community.dialect.SQLiteDialect
 logging:
   level:
     #org.springframework.cache: TRACE
     org.springframework: warn
 project:
   version: v@version@
-#url: http://localhost:8080

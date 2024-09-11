@@ -58,10 +58,10 @@ public class MyFileBot implements SpringLongPollingBot, LongPollingSingleThreadU
 
 	private final String url;
 
-	public MyFileBot(@Value("${telegram.bot.token:}")
+	public MyFileBot(@Value("${tg_token:}")
 	String botToken, @Value("${url:}")
-	String url, @Value("${telegram.bot.name:}")
-	String name, @Value("${telegram.bot.chatId:}")
+	String url, @Value("${tg_name:}")
+	String name, @Value("${tg_chatId:}")
 	String chatId)
 	{
 		this.botToken = botToken;
