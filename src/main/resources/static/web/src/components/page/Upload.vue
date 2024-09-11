@@ -204,12 +204,16 @@ const handlePreview = (file, { event }) => {
 };
 const handleFinish = ({ file, event }) => {
   const retData = JSON.parse((event?.target).response);
-  fileUrl.value = retData.data[0].url;
-  file.url = fileUrl.value;
-  content.value = fileUrl.value;
-  copyToClipboard(fileUrl.value, "URL", false);
-  showUrl.value = true;
-  message.success("文件上传成功，链接已复制到剪切板！");
+  if (retData.data.length > 0) {
+    fileUrl.value = retData.data[0].url;
+    file.url = fileUrl.value;
+    content.value = fileUrl.value;
+    copyToClipboard(fileUrl.value, "URL", false);
+    showUrl.value = true;
+    message.success("文件上传成功，链接已复制到剪切板！");
+  } else {
+    message.error(retData.msg);
+  }
 };
 const handleRemove = (data) => {
   const store = useStore();
