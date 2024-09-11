@@ -15,7 +15,7 @@ public class GlobalExceptionHandler
 	@ExceptionHandler(Exception.class)
 	public RespBody<?> handleException(Exception e)
 	{
-		log.error(e.getMessage(), e);
+		//log.error(e.getMessage(), e);
 		return RespBody.error(RespCode.INTERNAL_ERROR.message);
 	}
 

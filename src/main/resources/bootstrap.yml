@@ -1,7 +1,0 @@
-spring:
-  application:
-    name: tg-files
-  profiles:
-    active: mysql
-  config:
-    import: classpath:common.yml
