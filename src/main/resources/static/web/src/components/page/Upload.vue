@@ -194,11 +194,13 @@ const handleUploadChange = (data) => {
   fileListRef.value = data.fileList;
 };
 const handlePreview = (file, { event }) => {
-  fileUrl.value = file.url;
-  content.value = fileUrl.value;
-  copyToClipboard(fileUrl.value, "URL", false);
-  showUrl.value = true;
-  message.success("链接已复制到剪切板！");
+  if (file.status === "finished") {
+    fileUrl.value = file.url;
+    content.value = fileUrl.value;
+    copyToClipboard(fileUrl.value, "URL", false);
+    showUrl.value = true;
+    message.success("链接已复制到剪切板！");
+  }
   event.preventDefault();
 };
 const handleFinish = ({ file, event }) => {
@@ -211,6 +213,7 @@ const handleFinish = ({ file, event }) => {
     showUrl.value = true;
     message.success("文件上传成功，链接已复制到剪切板！");
   } else {
+    file.status = "error";
     message.error(retData.msg);
   }
 };
@@ -220,6 +223,7 @@ const handleRemove = (data) => {
   let id = parts[parts.length - 1];
   deleteFile(id, store.UserToken).then((response) => {
     message.success("删除成功！");
+    setFileList();
   });
 };
 const copyClick = (type) => {
