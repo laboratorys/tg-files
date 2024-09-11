@@ -177,10 +177,13 @@ const setFileList = () => {
       });
       fileListRef.value = data;
       totalPages.value = response.data.totalPages;
-      fileUrl.value = data[0].url;
-      content.value = fileUrl.value;
-      copyToClipboard(fileUrl.value, "URL", false);
-      showUrl.value = true;
+      if (data.length > 0) {
+        fileUrl.value = data[0].url;
+        content.value = fileUrl.value;
+        copyToClipboard(fileUrl.value, "URL", false);
+        showUrl.value = true;
+      }
+
       loadingBar.finish();
     }
   );
