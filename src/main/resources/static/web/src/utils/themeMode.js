@@ -3,14 +3,18 @@ import { lightTheme, darkTheme } from "naive-ui";
 import { useStore } from "@/utils/store.js";
 
 const currentTheme = ref(lightTheme);
-const updateThemeMode = () => {
+const updateThemeMode = (t) => {
   const store = useStore();
-  if (store.ThemeMode === "auto") {
-    store.ThemeMode = "light";
-  } else if (store.ThemeMode === "dark") {
-    store.ThemeMode = "light";
-  } else if (store.ThemeMode === "light") {
-    store.ThemeMode = "auto";
+  if (t) {
+    store.ThemeMode = t;
+  } else {
+    if (store.ThemeMode === "auto") {
+      store.ThemeMode = "light";
+    } else if (store.ThemeMode === "dark") {
+      store.ThemeMode = "light";
+    } else if (store.ThemeMode === "light") {
+      store.ThemeMode = "auto";
+    }
   }
   initThemeMode();
 };
