@@ -2,7 +2,7 @@ package com.github.lab.files.controller;
 
 import cn.hutool.core.io.IoUtil;
 import com.github.lab.files.common.BizException;
-import com.github.lab.files.model.FileInfo;
+import com.github.lab.files.model.db.FileInfo;
 import com.github.lab.files.service.FilesService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +28,6 @@ public class PageController
 	public String index()
 	{
 		return "index.html";
-	}
-
-	@RequestMapping("/admin")
-	public String admin()
-	{
-		return "admin.html";
 	}
 
 	@GetMapping("/f/{id}")

@@ -1,5 +1,6 @@
 package com.github.lab.files.config;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
@@ -7,7 +8,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.github.lab.files.common.ShortIdUtil;
-import com.github.lab.files.model.FileInfo;
+import com.github.lab.files.model.db.FileInfo;
 import com.github.lab.files.repository.FileInfoRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -91,7 +92,7 @@ public class MyFileBot implements SpringLongPollingBot, LongPollingSingleThreadU
 	{
 		if (update.hasMessage())
 		{
-			FileInfo fileInfo = handleMessage(update.getMessage(), null);
+			FileInfo fileInfo = handleMessage(update.getMessage(), null, null);
 			long chat_id = update.getMessage().getChatId();
 			String link = StrUtil.format("{}/f/{}", URLUtil.normalize(url), fileInfo.getShortId());
 			String msgText = StrUtil.format("文件名称：{}\n文件大小：{}\n文件直链\uD83D\uDE80：" +
@@ -120,12 +121,13 @@ public class MyFileBot implements SpringLongPollingBot, LongPollingSingleThreadU
 		log.info("Registered bot running state is: {}", botSession.isRunning());
 	}
 
-	public FileInfo handleMessage(Message message, String hash)
+	public FileInfo handleMessage(Message message, String hash, String token)
 	{
 		FileInfo record = new FileInfo();
 		record.setId(IdUtil.fastSimpleUUID());
 		record.setUploadTime(new Date());
 		record.setHash(hash);
+		record.setToken(token);
 		if (message.hasDocument())
 		{
 			Document doc = message.getDocument();
@@ -224,11 +226,23 @@ public class MyFileBot implements SpringLongPollingBot, LongPollingSingleThreadU
 			FileInfo record = this.getFileInfoByHash(hash, info.getName());
 			if (record != null)
 			{
-				return record;
+				if (StrUtil.isNotBlank(info.getToken()) && (record.getToken() == null || !record.getToken().equals(info.getToken())))
+				{
+					FileInfo newRecord = BeanUtil.copyProperties(record, FileInfo.class);
+					newRecord.setId(IdUtil.fastSimpleUUID());
+					newRecord.setToken(info.getToken());
+					newRecord.setShortId(ShortIdUtil.getShortId(record.getTgFileId()));
+					fileInfoRepository.save(newRecord);
+					return newRecord;
+				}
+				else
+				{
+					return record;
+				}
 			}
 			SendDocument document = SendDocument.builder().chatId(chatId).document(new InputFile(is2, info.getName())).build();
 			Message message = telegramClient.execute(document);
-			return handleMessage(message, hash);
+			return handleMessage(message, hash, info.getToken());
 		}
 		catch (TelegramApiException e)
 		{

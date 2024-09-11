@@ -1,4 +1,4 @@
-package com.github.lab.files.model;
+package com.github.lab.files.model.db;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -27,4 +27,5 @@ public class FileInfo
 	private String tgFileUniqueId;
 	private String mimeType;
 	private Date uploadTime;
+	private String token;
 }

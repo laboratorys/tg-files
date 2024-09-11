@@ -7,5 +7,5 @@
          (__)    (__)     (_)   (__)
 ${AnsiColor.BRIGHT_GREEN}
 Project Version: ${project.version}
-Spring Boot Version: ${spring-boot.version}${spring-boot.formatted-version}
+Spring Boot Version: ${spring-boot.formatted-version}
 ${AnsiColor.BLACK}

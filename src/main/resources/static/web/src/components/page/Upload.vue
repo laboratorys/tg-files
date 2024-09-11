@@ -1,0 +1,210 @@
+<template>
+  <n-flex
+    justify="center"
+    align="center"
+    vertical
+    style="width: 100vw; height: 70vh">
+    <n-upload
+      multiple
+      action="/api/public/file/upload"
+      :multiple="true"
+      name="files"
+      list-type="image"
+      :headers="uploadHeaders"
+      :show-file-list="false"
+      v-model:file-list="fileListRef"
+      show-download-button
+      @finish="handleFinish"
+      @remove="handleRemove"
+      @change="handleUploadChange"
+      @preview="handlePreview"
+      class="upload_items">
+      <n-upload-dragger>
+        <div style="margin-bottom: 12px">
+          <n-icon size="48" :depth="3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+              <path
+                d="M80 152v256a40.12 40.12 0 0 0 40 40h272a40.12 40.12 0 0 0 40-40V152"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="32"></path>
+              <rect
+                x="48"
+                y="64"
+                width="416"
+                height="80"
+                rx="28"
+                ry="28"
+                fill="none"
+                stroke="currentColor"
+                stroke-linejoin="round"
+                stroke-width="32"></rect>
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="32"
+                d="M320 304l-64 64l-64-64"></path>
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="32"
+                d="M256 345.89V224"></path>
+            </svg>
+          </n-icon>
+        </div>
+        <n-text style="font-size: 16px">
+          点击或者拖动文件到该区域来上传
+        </n-text>
+        <n-p depth="3" style="margin: 8px 0 0 0">
+          请不要上传敏感数据，比如你的银行卡号和密码，信用卡号有效期和安全码
+        </n-p>
+      </n-upload-dragger>
+      <n-card
+        style="margin-top: 6px"
+        title="文件列表"
+        v-show="showUrl || fileListRef.length > 0"
+        @click.stop="clickFileList()">
+        <n-upload-file-list />
+      </n-card>
+    </n-upload>
+    <n-card v-show="showUrl" class="upload_items" content-style="padding: 10px">
+      <n-flex justify="center" align="center" vertical>
+        <n-button-group v-show="showUrl">
+          <n-button type="primary" @click="copyClick('URL')">
+            <template #icon>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+                <path
+                  d="M574 665.4a8.03 8.03 0 0 0-11.3 0L446.5 781.6c-53.8 53.8-144.6 59.5-204 0c-59.5-59.5-53.8-150.2 0-204l116.2-116.2c3.1-3.1 3.1-8.2 0-11.3l-39.8-39.8a8.03 8.03 0 0 0-11.3 0L191.4 526.5c-84.6 84.6-84.6 221.5 0 306s221.5 84.6 306 0l116.2-116.2c3.1-3.1 3.1-8.2 0-11.3L574 665.4zm258.6-474c-84.6-84.6-221.5-84.6-306 0L410.3 307.6a8.03 8.03 0 0 0 0 11.3l39.7 39.7c3.1 3.1 8.2 3.1 11.3 0l116.2-116.2c53.8-53.8 144.6-59.5 204 0c59.5 59.5 53.8 150.2 0 204L665.3 562.6a8.03 8.03 0 0 0 0 11.3l39.8 39.8c3.1 3.1 8.2 3.1 11.3 0l116.2-116.2c84.5-84.6 84.5-221.5 0-306.1zM610.1 372.3a8.03 8.03 0 0 0-11.3 0L372.3 598.7a8.03 8.03 0 0 0 0 11.3l39.6 39.6c3.1 3.1 8.2 3.1 11.3 0l226.4-226.4c3.1-3.1 3.1-8.2 0-11.3l-39.5-39.6z"
+                  fill="currentColor"></path>
+              </svg>
+            </template>
+            URL
+          </n-button>
+          <n-button type="info" @click="copyClick('Markdown')">
+            <template #icon>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <g
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                  <path d="M7 15V9l2 2l2-2v6"></path>
+                  <path d="M14 13l2 2l2-2m-2 2V9"></path>
+                </g>
+              </svg>
+            </template>
+            Markdown
+          </n-button>
+          <n-button type="warning" @click="copyClick('BBCode')">
+            <template #icon>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path
+                  d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"
+                  fill="currentColor"></path>
+              </svg>
+            </template>
+            BBCode
+          </n-button>
+        </n-button-group>
+        <n-input
+          v-model:value="content"
+          type="textarea"
+          v-show="showUrl"></n-input>
+      </n-flex>
+    </n-card>
+  </n-flex>
+</template>
+<script setup>
+import { useStore } from "@/utils/store.js";
+import { message } from "@/utils/message.js";
+import { getToken, deleteFile, getFileList } from "@/utils/api.js";
+const showUrl = ref(false);
+const fileUrl = ref("");
+const fileName = ref("");
+const content = ref("");
+const uploadHeaders = ref({});
+const fileListRef = ref([]);
+onMounted(() => {
+  const store = useStore();
+  if (!store.UserToken) {
+    getToken().then((response) => {
+      store.UserToken = response.data;
+      uploadHeaders.value = { Authorization: store.UserToken };
+      setFileList();
+    });
+  } else {
+    uploadHeaders.value = { Authorization: store.UserToken };
+    setFileList();
+  }
+});
+const setFileList = () => {
+  const store = useStore();
+  getFileList(1, 5, store.UserToken).then((response) => {
+    let data = response.data.content;
+    data.forEach(function (item, index, arr) {
+      item.url = origin + "/f/" + item.id;
+      data[index] = item;
+    });
+    fileListRef.value = data;
+  });
+};
+const handleUploadChange = (data) => {
+  fileListRef.value = data.fileList;
+};
+const handlePreview = (file, { event }) => {
+  fileUrl.value = file.url;
+  content.value = fileUrl.value;
+  copyToClipboard(fileUrl.value, "URL", false);
+  showUrl.value = true;
+  message.success("链接已复制到剪切板！");
+  event.preventDefault();
+};
+const handleFinish = ({ file, event }) => {
+  const retData = JSON.parse((event?.target).response);
+  fileUrl.value = origin + "/f/" + retData.data[0];
+  file.url = fileUrl.value;
+  content.value = fileUrl.value;
+  copyToClipboard(fileUrl.value, "URL", false);
+  showUrl.value = true;
+  message.success("文件上传成功，链接已复制到剪切板！");
+};
+const handleRemove = (data) => {
+  const store = useStore();
+  let parts = data.file.url.split("/");
+  let id = parts[parts.length - 1];
+  deleteFile(id, store.UserToken).then((response) => {
+    message.success("删除成功！");
+  });
+};
+const copyClick = (type) => {
+  var text = fileUrl.value;
+  if (type === "Markdown") {
+    text = "![" + fileName.value + "](" + fileUrl.value + ")";
+  } else if (type === "BBCode") {
+    text = "[img]" + fileUrl.value + "[/img]";
+  }
+  content.value = text;
+  copyToClipboard(text, type, true);
+};
+const copyToClipboard = (text, type, isNotify) => {
+  const input = document.createElement("textarea");
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("copy");
+  document.body.removeChild(input);
+  if (isNotify) {
+    message.success(type + "已复制到剪贴板");
+  }
+};
+const clickFileList = () => {};
+</script>
+<style scoped></style>
