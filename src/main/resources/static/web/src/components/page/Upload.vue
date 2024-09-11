@@ -203,7 +203,7 @@ const handlePreview = (file, { event }) => {
 };
 const handleFinish = ({ file, event }) => {
   const retData = JSON.parse((event?.target).response);
-  if (retData.data.length > 0) {
+  if (retData.data && retData.data.length > 0) {
     fileUrl.value = retData.data[0].url;
     file.url = fileUrl.value;
     content.value = fileUrl.value;
