@@ -93,6 +93,26 @@
             </template>
             Markdown
           </n-button>
+          <n-button type="error" @click="copyClick('HTML')">
+            <template #icon>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 24 24">
+                <g
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M20 4l-2 14.5l-6 2l-6-2L4 4z"></path>
+                  <path
+                    d="M15.5 8h-7l.5 4h6l-.5 3.5l-2.5.75l-2.5-.75l-.1-.5"></path>
+                </g>
+              </svg>
+            </template>
+            HTML
+          </n-button>
           <n-button type="warning" @click="copyClick('BBCode')">
             <template #icon>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -161,6 +181,7 @@ const setFileList = () => {
       totalPages.value = response.data.totalPages;
       if (data && data.length > 0) {
         fileUrl.value = data[0].url;
+        fileName.value = data[0].name;
         content.value = fileUrl.value;
         copyToClipboard(fileUrl.value, "URL", false);
         showUrl.value = true;
@@ -219,6 +240,15 @@ const copyClick = (type) => {
     text = "![" + fileName.value + "](" + fileUrl.value + ")";
   } else if (type === "BBCode") {
     text = "[img]" + fileUrl.value + "[/img]";
+  } else if (type === "HTML") {
+    text =
+      '<img src="' +
+      fileUrl.value +
+      '" alt="' +
+      fileName.value +
+      '" title="' +
+      fileName.value +
+      '" />';
   }
   content.value = text;
   copyToClipboard(text, type, true);
