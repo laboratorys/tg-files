@@ -7,4 +7,6 @@ public class InfoVO
 {
 	private String version;
 	private Long totalCount;
+	private Long maxSize;
+	private String maxSizeFmt;
 }

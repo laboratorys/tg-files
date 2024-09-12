@@ -6,6 +6,7 @@
         type="text"
         v-model:value="store.UserToken"
         placeholder="上传密钥"
+        @change="handleKeyChange"
         clearable />
     </n-input-group>
 
@@ -23,51 +24,27 @@
       @remove="handleRemove"
       @change="handleUploadChange"
       @preview="handlePreview"
+      @before-upload="validUploadRequest"
       class="upload_items">
       <n-upload-dragger>
         <div style="margin-bottom: 12px">
-          <n-icon size="48" :depth="3">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+          <n-icon size="48" color="rgb(46 222 174)">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 24 24">
               <path
-                d="M80 152v256a40.12 40.12 0 0 0 40 40h272a40.12 40.12 0 0 0 40-40V152"
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="32"></path>
-              <rect
-                x="48"
-                y="64"
-                width="416"
-                height="80"
-                rx="28"
-                ry="28"
-                fill="none"
-                stroke="currentColor"
-                stroke-linejoin="round"
-                stroke-width="32"></rect>
-              <path
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="32"
-                d="M320 304l-64 64l-64-64"></path>
-              <path
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="32"
-                d="M256 345.89V224"></path>
+                d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5c0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l4.65-4.65c.2-.2.51-.2.71 0L17 13h-3z"
+                fill="currentColor"></path>
             </svg>
           </n-icon>
         </div>
         <n-text style="font-size: 16px">
-          点击或者拖动文件到该区域来上传
+          点击上传或将文件拖拽到此处，也可以拷贝图片链接或图片内容后按Ctrl+V上传
         </n-text>
         <n-p depth="3" style="margin: 8px 0 0 0">
-          本站已上传文件：{{ store.Info.totalCount }}
+          最大可上传{{ store.Info.maxSizeFmt }}的图片，单次同时可选择 5
+          张，本站已上传文件：{{ store.Info.totalCount }}
         </n-p>
       </n-upload-dragger>
       <n-card
@@ -131,6 +108,13 @@
           v-model:value="content"
           type="textarea"
           v-show="showUrl"></n-input>
+        <n-modal
+          v-model:show="showModal"
+          preset="card"
+          style="width: 600px"
+          title="预览">
+          <img :src="previewImageUrl" style="width: 100%" />
+        </n-modal>
       </n-flex>
     </n-card>
   </n-flex>
@@ -149,17 +133,16 @@ const pageNo = ref(1);
 const totalPages = ref(1);
 const pageSize = ref(5);
 const store = useStore();
-
+const showModal = ref(false);
+const previewImageUrl = ref("");
 onMounted(() => {
   if (!store.UserToken) {
     getToken().then((response) => {
       store.UserToken = response.data;
-      uploadHeaders.value = { Authorization: store.UserToken };
-      setFileList();
+      handleKeyChange();
     });
   } else {
-    uploadHeaders.value = { Authorization: store.UserToken };
-    setFileList();
+    handleKeyChange();
   }
   getInfo().then((response) => {
     store.Info = response.data;
@@ -182,6 +165,8 @@ const setFileList = () => {
         content.value = fileUrl.value;
         copyToClipboard(fileUrl.value, "URL", false);
         showUrl.value = true;
+      } else {
+        showUrl.value = false;
       }
       loadingBar.finish();
     }
@@ -200,11 +185,13 @@ const handlePreview = (file, { event }) => {
     copyToClipboard(fileUrl.value, "URL", false);
     showUrl.value = true;
     message.success("链接已复制到剪切板！");
+    previewImageUrl.value = file.url;
+    showModal.value = true;
   }
   event.preventDefault();
 };
 const handleFinish = ({ file, event }) => {
-  const retData = JSON.parse((event?.target).response);
+  const retData = JSON.parse(event.target.response);
   if (retData.data && retData.data.length > 0) {
     fileUrl.value = retData.data[0].url;
     file.url = fileUrl.value;
@@ -218,13 +205,15 @@ const handleFinish = ({ file, event }) => {
   }
 };
 const handleRemove = (data) => {
-  const store = useStore();
-  let parts = data.file.url.split("/");
-  let id = parts[parts.length - 1];
-  deleteFile(id, store.UserToken).then((response) => {
-    message.success("删除成功！");
-    setFileList();
-  });
+  if (data.file.status === "finished") {
+    const store = useStore();
+    let parts = data.file.url.split("/");
+    let id = parts[parts.length - 1];
+    deleteFile(id, store.UserToken).then((response) => {
+      message.success("删除成功！");
+      setFileList();
+    });
+  }
 };
 const copyClick = (type) => {
   var text = fileUrl.value;
@@ -243,10 +232,21 @@ const copyToClipboard = (text, type, isNotify) => {
   input.select();
   document.execCommand("copy");
   document.body.removeChild(input);
-  if (isNotify) {
+  if (isNotify === true) {
     message.success(type + "已复制到剪贴板");
   }
 };
 const clickFileList = () => {};
+const validUploadRequest = ({ file }) => {
+  if (file.file.size > useStore.Info.maxSize) {
+    message.error("上传失败，文件大小已超上限：" + useStore.Info.maxSizeFmt);
+    return false;
+  }
+  return true;
+};
+const handleKeyChange = () => {
+  uploadHeaders.value = { Authorization: store.UserToken };
+  setFileList();
+};
 </script>
 <style scoped></style>

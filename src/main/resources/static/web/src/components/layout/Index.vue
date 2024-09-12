@@ -6,7 +6,7 @@
         class="layout-left"
         href="/"
         style="font-size: 20px; text-decoration: none">
-        🖼Telegram图床
+        🖼图床
       </n-a>
       <div class="nav-end">
         <n-dropdown
@@ -57,7 +57,9 @@
         align-items: center;
         background-color: transparent;
       ">
-      <n-text>©2023 Libs. All rights reserved.</n-text>
+      <n-text
+        >©{{ new Date().getFullYear() }} Libs. All rights reserved.</n-text
+      >
     </n-layout-footer>
   </n-layout>
 </template>

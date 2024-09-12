@@ -1,4 +1,4 @@
-package com.github.lab.files.config;
+package com.github.lab.files.service.upload;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
@@ -7,6 +7,8 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.crypto.SecureUtil;
+import com.github.lab.files.common.BizException;
+import com.github.lab.files.common.Constant;
 import com.github.lab.files.common.ShortIdUtil;
 import com.github.lab.files.model.db.FileInfo;
 import com.github.lab.files.repository.FileInfoRepository;
@@ -43,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
-public class MyFileBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer
+public class TelegramFileBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer, BaseUploadService
 {
 	@Resource
 	private FileInfoRepository fileInfoRepository;
@@ -58,7 +60,7 @@ public class MyFileBot implements SpringLongPollingBot, LongPollingSingleThreadU
 
 	private final String url;
 
-	public MyFileBot(@Value("${telegram.bot.token:}")
+	public TelegramFileBot(@Value("${telegram.bot.token:}")
 	String botToken, @Value("${url:}")
 	String url, @Value("${telegram.bot.name:}")
 	String name, @Value("${telegram.bot.chatId:}")
@@ -215,11 +217,16 @@ public class MyFileBot implements SpringLongPollingBot, LongPollingSingleThreadU
 		return null;
 	}
 
+	@Override
 	public FileInfo uploadFile(InputStream inputStream, FileInfo info)
 	{
 		try
 		{
 			byte[] content = IoUtil.readBytes(inputStream);
+			if (content.length > Constant.fileSize)
+			{
+				throw new BizException("上传失败，上传失败，文件大小已超上限：10MB");
+			}
 			InputStream is1 = new ByteArrayInputStream(content);
 			InputStream is2 = new ByteArrayInputStream(content);
 			String hash = SecureUtil.sha1(is1);

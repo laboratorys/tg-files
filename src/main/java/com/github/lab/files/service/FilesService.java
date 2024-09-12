@@ -4,13 +4,14 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import com.github.lab.files.common.BizException;
-import com.github.lab.files.config.MyFileBot;
+import com.github.lab.files.common.Constant;
 import com.github.lab.files.model.db.FileInfo;
 import com.github.lab.files.model.vo.FileInfoVO;
 import com.github.lab.files.model.vo.InfoVO;
 import com.github.lab.files.model.vo.PageVO;
 import com.github.lab.files.model.vo.UploadFileVO;
 import com.github.lab.files.repository.FileInfoRepository;
+import com.github.lab.files.service.upload.TelegramFileBot;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +30,7 @@ import java.util.List;
 public class FilesService
 {
 	@Resource
-	private MyFileBot bot;
+	private TelegramFileBot bot;
 
 	@Resource
 	private FileInfoRepository fileInfoRepository;
@@ -83,7 +83,7 @@ public class FilesService
 						FileInfo record = bot.uploadFile(f.getInputStream(), info);
 						fileList.add(new FileInfoVO(record.getShortId(), record.getName(), StrUtil.format("{}/f/{}", baseUrl, record.getShortId())));
 					}
-					catch (IOException e)
+					catch (Exception e)
 					{
 						log.error(e.getMessage(), e);
 						throw new BizException("文件上传失败");
@@ -165,6 +165,8 @@ public class FilesService
 		long count = fileInfoRepository.count(Example.of(new FileInfo()));
 		info.setTotalCount(count);
 		info.setVersion(version);
+		info.setMaxSize(Constant.fileSize);
+		info.setMaxSizeFmt(Constant.fileSizeFmt);
 		return info;
 	}
 }
