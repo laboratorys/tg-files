@@ -149,7 +149,6 @@ onMounted(() => {
   });
 });
 const setFileList = () => {
-  const store = useStore();
   loadingBar.start();
   getFileList(pageNo.value, pageSize.value, store.UserToken).then(
     (response) => {
@@ -206,7 +205,6 @@ const handleFinish = ({ file, event }) => {
 };
 const handleRemove = (data) => {
   if (data.file.status === "finished") {
-    const store = useStore();
     let parts = data.file.url.split("/");
     let id = parts[parts.length - 1];
     deleteFile(id, store.UserToken).then((response) => {
@@ -238,8 +236,8 @@ const copyToClipboard = (text, type, isNotify) => {
 };
 const clickFileList = () => {};
 const validUploadRequest = ({ file }) => {
-  if (file.file.size > useStore.Info.maxSize) {
-    message.error("上传失败，文件大小已超上限：" + useStore.Info.maxSizeFmt);
+  if (file.file.size > store.Info.maxSize) {
+    message.error("上传失败，文件大小已超上限：" + store.Info.maxSizeFmt);
     return false;
   }
   return true;
