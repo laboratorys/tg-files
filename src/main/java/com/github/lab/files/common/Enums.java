@@ -15,7 +15,7 @@ public class Enums
 	@AllArgsConstructor
 	public enum CacheEnum
 	{
-		FILE("file", 50L, Duration.ofDays(1));
+		FILE("file", 100L, Duration.ofDays(7));
 		private String name;
 		private Long maxSize;
 		private Duration ttl;

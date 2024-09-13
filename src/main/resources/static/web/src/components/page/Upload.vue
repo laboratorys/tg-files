@@ -1,5 +1,9 @@
 <template>
-  <n-flex align="center" vertical style="width: 100vw; height: 81vh">
+  <n-flex
+    justify="center"
+    align="center"
+    vertical
+    style="width: 100vw; height: 81vh">
     <n-input-group class="upload_items">
       <n-button type="primary"> 密钥 </n-button>
       <n-input
@@ -19,6 +23,7 @@
       :headers="uploadHeaders"
       :show-file-list="false"
       v-model:file-list="fileListRef"
+      accept=".png,.jpg,.jpeg,.gif,.bmp,.webp,.svg"
       show-download-button
       @finish="handleFinish"
       @remove="handleRemove"
@@ -155,6 +160,7 @@ const pageSize = ref(5);
 const store = useStore();
 const showModal = ref(false);
 const previewImageUrl = ref("");
+
 onMounted(() => {
   if (!store.UserToken) {
     getToken().then((response) => {

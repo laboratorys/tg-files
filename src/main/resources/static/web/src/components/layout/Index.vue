@@ -6,7 +6,15 @@
         class="layout-left"
         href="/"
         style="font-size: 20px; text-decoration: none">
-        🖼图床
+        <img
+          src="/favicon.png"
+          style="
+            width: 28px;
+            height: 25px;
+            margin-left: 20px;
+            vertical-align: middle;
+          " />
+        图床
       </n-a>
       <div class="nav-end">
         <n-dropdown

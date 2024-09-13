@@ -48,7 +48,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://img.us-cdp2.choreoapps.dev",
+        target: "http://localhost:8080",
         changeOrigin: true,
       },
     },
