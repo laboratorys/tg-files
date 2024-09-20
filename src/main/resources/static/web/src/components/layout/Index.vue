@@ -44,15 +44,20 @@
           </n-icon>
         </n-button>
         <n-divider vertical></n-divider>
-        <n-tag disabled size="small"> {{ store.Info.version }} </n-tag>
+        <Avatar />
       </div>
     </n-layout-header>
-    <n-layout style="height: 88vh">
+    <n-layout :has-sider="store.LoginInfo.isLogin" style="height: 88vh">
+      <SlideMenu />
       <n-layout
         :native-scrollbar="false"
         class="content"
         style="margin: 15px; flex-grow: 1">
-        <div class="container"><Upload /></div>
+        <div class="container bg" :style="bgCss">
+          <router-view v-slot="{ Component }">
+            <component :is="Component" />
+          </router-view>
+        </div>
       </n-layout>
     </n-layout>
     <n-layout-footer
@@ -69,16 +74,22 @@
         >©{{ new Date().getFullYear() }} Libs. All rights reserved.</n-text
       >
     </n-layout-footer>
+    <Login></Login>
   </n-layout>
 </template>
 
 <script setup>
-import Upload from "@/components/page/Upload.vue";
 import { updateThemeMode } from "@/utils/themeMode.js";
 import { NIcon } from "naive-ui";
 import { DarkTheme24Regular, Checkmark16Regular } from "@vicons/fluent";
 import { useStore } from "@/utils/store.js";
+import SlideMenu from "@/components/page/admin/SlideMenu.vue";
+import Avatar from "@/components/page/public/Avatar.vue";
+import Login from "@/components/page/public/Login.vue";
+import { getLoginInfo } from "@/utils/api.js";
+import bg from "@/assets/bg.svg";
 const store = useStore();
+const bgCss = 'background-image: url("' + bg + '")';
 const OpenUrl = (url) => {
   window.open(window.open(url, "_blank"), "_blank");
 };
@@ -108,6 +119,11 @@ const handleSelect = (key) => {
   updateThemeMode(key);
   setThemeOption();
 };
+onMounted(() => {
+  getLoginInfo().then((res) => {
+    store.LoginInfo = res.data;
+  });
+});
 </script>
 
 <style scoped></style>

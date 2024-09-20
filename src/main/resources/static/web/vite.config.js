@@ -36,6 +36,7 @@ export default defineConfig({
     },
   },
   build: {
+    assetsInlineLimit: 1,
     outDir: "../../static",
     //chunkSizeWarningLimit: 1000,
     terserOptions: {

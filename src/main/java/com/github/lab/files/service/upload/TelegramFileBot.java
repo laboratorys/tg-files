@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
-public class TelegramFileBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer, BaseUploadService
+public class TelegramFileBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer, BaseUploadStrategy
 {
 	@Resource
 	private FileInfoRepository fileInfoRepository;
@@ -123,13 +123,13 @@ public class TelegramFileBot implements SpringLongPollingBot, LongPollingSingleT
 		log.info("Registered bot running state is: {}", botSession.isRunning());
 	}
 
-	public FileInfo handleMessage(Message message, String hash, String token)
+	public FileInfo handleMessage(Message message, String hash, FileInfo info)
 	{
 		FileInfo record = new FileInfo();
 		record.setId(IdUtil.fastSimpleUUID());
 		record.setUploadTime(new Date());
 		record.setHash(hash);
-		record.setToken(token);
+		record.setToken(info.getToken());
 		if (message.hasDocument())
 		{
 			Document doc = message.getDocument();
@@ -184,6 +184,10 @@ public class TelegramFileBot implements SpringLongPollingBot, LongPollingSingleT
 		if (StrUtil.isNotBlank(record.getTgFileId()))
 		{
 			record.setShortId(ShortIdUtil.getShortId(record.getTgFileId()));
+			if (StrUtil.isNotBlank(info.getName()))
+			{
+				record.setName(info.getName());
+			}
 			fileInfoRepository.save(record);
 		}
 		return record;
@@ -247,9 +251,15 @@ public class TelegramFileBot implements SpringLongPollingBot, LongPollingSingleT
 					return record;
 				}
 			}
-			SendDocument document = SendDocument.builder().chatId(chatId).document(new InputFile(is2, info.getName())).build();
+			String fileName = info.getName();
+			if (StrUtil.endWith(fileName, ".gif") || StrUtil.endWith(fileName, ".webp"))
+			{
+				fileName = StrUtil.replace(fileName, ".gif", ".jpeg");
+				fileName = StrUtil.replace(fileName, ".webp", ".jpeg");
+			}
+			SendDocument document = SendDocument.builder().chatId(chatId).document(new InputFile(is2, fileName)).build();
 			Message message = telegramClient.execute(document);
-			return handleMessage(message, hash, info.getToken());
+			return handleMessage(message, hash, info);
 		}
 		catch (TelegramApiException e)
 		{

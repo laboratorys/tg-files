@@ -1,10 +1,12 @@
 import { message } from "@/utils/message.js";
+import { useStore } from "@/utils/store.js";
 export function reqResolve(config) {
+  const store = useStore();
   // 防止缓存，给get请求加上时间戳
   if (config.method === "get") {
     config.params = { ...config.params, t: new Date().getTime() };
   }
-
+  config.headers.Authorization = store.LoginInfo.token;
   return config;
 }
 
@@ -15,6 +17,9 @@ export function reqReject(error) {
 export function resResolve(response) {
   if (response.data && response.data.code && response.data.code != 200) {
     message.error(response.data.msg);
+    if (response.data.code == 401) {
+      store.LoginInfo = { isLogin: false, token: "", userName: "" };
+    }
   }
   return response?.data;
 }

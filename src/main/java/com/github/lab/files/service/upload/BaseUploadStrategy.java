@@ -4,7 +4,7 @@ import com.github.lab.files.model.db.FileInfo;
 
 import java.io.InputStream;
 
-public interface BaseUploadService
+public interface BaseUploadStrategy
 {
 	FileInfo uploadFile(InputStream inputStream, FileInfo info);
 }

@@ -1,5 +1,6 @@
 package com.github.lab.files.common;
 
+import cn.dev33.satoken.exception.NotLoginException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,6 +28,13 @@ public class GlobalExceptionHandler
 	{
 		log.error(e.getMessage(), e);
 		return RespBody.error(e.getMessage());
+	}
+
+	@ExceptionHandler(NotLoginException.class)
+	public RespBody<?> handleNotLoginException(NotLoginException e)
+	{
+		log.warn(e.getMessage());
+		return RespBody.error(RespCode.UNAUTHORIZED.code, "登陆失效或已过期，请重新登陆");
 	}
 
 }

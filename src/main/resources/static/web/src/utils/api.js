@@ -27,3 +27,25 @@ export function getInfo() {
     method: "get",
   });
 }
+//获取登陆信息
+export function getLoginInfo() {
+  return request({
+    url: `/api/public/user/getLoginInfo`,
+    method: "get",
+  });
+}
+//退出登陆
+export function doLogout() {
+  return request({
+    url: `/api/public/user/logout`,
+    method: "get",
+  });
+}
+//登陆
+export function doLogin(data) {
+  return request({
+    url: `/api/public/user/login`,
+    method: "post",
+    data,
+  });
+}

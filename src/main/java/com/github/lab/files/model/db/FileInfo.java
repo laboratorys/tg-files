@@ -28,4 +28,5 @@ public class FileInfo
 	private String mimeType;
 	private Date uploadTime;
 	private String token;
+	private String source;
 }

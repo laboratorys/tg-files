@@ -169,4 +169,18 @@ public class FilesService
 		info.setMaxSizeFmt(Constant.fileSizeFmt);
 		return info;
 	}
+
+	public PageVO<UploadFileVO> getAdminFileList(Integer pageNo, Integer pageSize)
+	{
+		Sort sort = Sort.by(Sort.Direction.ASC, "uploadTime");
+		Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
+		Page<FileInfo> page = fileInfoRepository.findAll(Example.of(new FileInfo()), pageable);
+		Page<UploadFileVO> data = page.map(f -> new UploadFileVO(f.getShortId(), f.getName(), StrUtil.format("{}/f/{}", baseUrl, f.getShortId()), "finished"));
+		return PageVO.<UploadFileVO> builder().
+				pageNo(pageNo).
+				pageSize(pageSize).
+				totalPages(data.getTotalPages()).
+				totalCount(data.getTotalElements()).
+				content(data.getContent()).build();
+	}
 }

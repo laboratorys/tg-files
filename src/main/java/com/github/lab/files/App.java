@@ -15,7 +15,6 @@ public class App
 			System.getProperties().put("socksProxyHost", "127.0.0.1");
 			System.getProperties().put("socksProxyPort", "10808");
 		}
-		System.getProperties().put("socksProxyPort", "10808");
 		SpringApplication.run(App.class, args);
 	}
 

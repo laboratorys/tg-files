@@ -35,6 +35,11 @@ public class RespBody<T>
 		return new RespBody<>(RespCode.OK.code, RespCode.OK.message, data);
 	}
 
+	public static <T> RespBody<T> okMsg(String msg)
+	{
+		return new RespBody<>(RespCode.OK.code, msg, null);
+	}
+
 	public static <T> RespBody<T> bad(String msg)
 	{
 		return new RespBody<>(RespCode.BAD_REQUEST.code, msg, null);
